@@ -19,7 +19,7 @@ import {
 const App = () => {
   return (
     <View>
-      <Text>SelamunAleyküm</Text>
+      <Text>SelamunAleyküm3</Text>
     </View>
   );
 };
