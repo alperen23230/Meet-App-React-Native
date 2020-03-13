@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "272401861006",
+    "firebase_url": "https://meetapp-f2122.firebaseio.com",
+    "project_id": "meetapp-f2122",
+    "storage_bucket": "meetapp-f2122.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272401861006:android:5897742c16bf837aa37cdf",
+        "android_client_info": {
+          "package_name": "com.meetapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "272401861006-38f7hb2g0kcf987dm43qgv7anfalteqb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX6PsAS7CFCXuuFwIPSxAZIxAI7vfnKaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "272401861006-38f7hb2g0kcf987dm43qgv7anfalteqb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
