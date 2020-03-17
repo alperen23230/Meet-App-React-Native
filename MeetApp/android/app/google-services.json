@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "272401861006-4tagthjmf0edtisbjh8foj1h80osl744.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.meetapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "272401861006-jvt2mbh3l8qdsc6pj2fuem8425bren4p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.meetapp",
+            "certificate_hash": "29002f0bf5b15198fd0169b54f3609707a4bfe27"
+          }
+        },
+        {
           "client_id": "272401861006-38f7hb2g0kcf987dm43qgv7anfalteqb.apps.googleusercontent.com",
           "client_type": 3
         }

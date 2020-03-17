@@ -1,37 +1,40 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { Button, View, Text } from 'react-native';
+import { } from 'react-native';
+import SplashScreen from './src/components/splash-screen/index';
+import Auth from './src/components/authentication/index';
+import InitialApp from './src/components/initial-app/index';
+import SelectUsername from './src/components/select-username/index';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-function HomeScreen({ navigation }) {
+
+const MainStack = createStackNavigator();
+const RootStack = createStackNavigator();
+
+function MainStackScreen() {
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Home Screen</Text>
-      <Button title="Go to Details" onPress={() => navigation.navigate('Details')} />
-    </View>
+    <MainStack.Navigator>
+      <MainStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
+      <MainStack.Screen name="Auth" component={Auth} options={{ headerShown: false }} />
+      <MainStack.Screen name="SelectUsername" component={SelectUsername} options={{ headerShown: false }} />
+    </MainStack.Navigator>
   );
 }
-
-function DetailsScreen() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Details Screen</Text>
-    </View>
-  );
-}
-
-const Stack = createStackNavigator();
 
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
+      <RootStack.Navigator mode="modal">
+        <RootStack.Screen
+          name="Main"
+          component={MainStackScreen}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen name="InitialApp" children={InitialApp} options={{headerShown: false}} />
+      </RootStack.Navigator>
     </NavigationContainer>
-  );
+  )
 }
 
 export default App;
