@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { } from 'react-native';
 import SplashScreen from './src/components/splash-screen/index';
 import Auth from './src/components/authentication/index';
 import InitialApp from './src/components/initial-app/index';
