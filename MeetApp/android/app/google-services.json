@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "272401861006",
+    "firebase_url": "https://meetapp-f2122.firebaseio.com",
+    "project_id": "meetapp-f2122",
+    "storage_bucket": "meetapp-f2122.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:272401861006:android:5897742c16bf837aa37cdf",
+        "android_client_info": {
+          "package_name": "com.meetapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "272401861006-4tagthjmf0edtisbjh8foj1h80osl744.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.meetapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "272401861006-jvt2mbh3l8qdsc6pj2fuem8425bren4p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.meetapp",
+            "certificate_hash": "29002f0bf5b15198fd0169b54f3609707a4bfe27"
+          }
+        },
+        {
+          "client_id": "272401861006-38f7hb2g0kcf987dm43qgv7anfalteqb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX6PsAS7CFCXuuFwIPSxAZIxAI7vfnKaM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "272401861006-38f7hb2g0kcf987dm43qgv7anfalteqb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
