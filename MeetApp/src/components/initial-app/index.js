@@ -3,7 +3,7 @@ import { BackHandler } from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 
 import Meets from '../meets/index'
-import CreateMeet from '../create-meet/index'
+import CreateMeet from '../create-meet/create-descriptions'
 import Profile from '../profile/index'
 
 const Tab = createBottomTabNavigator();

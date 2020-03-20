@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "^2.2.3",
     "@react-native-community/google-signin": "^4.0.0",
     "@react-native-community/masked-view": "^0.1.7",
     "@react-native-firebase/app": "^6.3.4",
@@ -19,8 +20,10 @@
     "@react-navigation/native": "^5.0.9",
     "@react-navigation/stack": "^5.1.1",
     "lottie-react-native": "^3.3.2",
+    "native-base": "^2.13.12",
     "react": "16.9.0",
     "react-native": "0.61.5",
+    "react-native-easy-grid": "^0.2.2",
     "react-native-gesture-handler": "^1.6.0",
     "react-native-reanimated": "^1.7.0",
     "react-native-safe-area-context": "^0.7.3",
