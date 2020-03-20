@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { Container, Text, Item, Content, Textarea, DatePicker } from 'native-base';
-import { StyleSheet, TextInput, TouchableHighlight, View, Button } from 'react-native';
+import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title } from 'native-base';
+import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar } from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import DateTimePicker from '@react-native-community/datetimepicker';
-
+import FirebaseDB from '../../networking/firebase/index';
+import CreateCode from '../../components/create-meet/create-codes';
 
 function CreateMeet() {
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
+    const [component, setComponent] = useState('createMeet')
 
+    // Descriptions features states
     const [time, setTime] = useState('Select Time');
     const [dates, setDates] = useState('Select Date');
+    const [title, setTitle] = useState();
+    const [description, setDescription] = useState();
+    const [quota, setQuota] = useState();
+
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -22,16 +29,13 @@ function CreateMeet() {
         setDates(words[2] + ' ' + words[1] + ' ' + words[3] + ' ' + words[0])
 
     };
-
     const showMode = currentMode => {
         setShow(true);
         setMode(currentMode);
     };
-
     const showDatepicker = () => {
         showMode('date');
     };
-
     const showTimepicker = () => {
         showMode('time');
     };
@@ -52,17 +56,44 @@ function CreateMeet() {
             </View>
         )
     }
+    const submitMeet = async () => {
+
+        if (title && description && dates && time != null) {
+            await FirebaseDB.createMeetDescriptions(title, description, dates, time, 9999);
+            setComponent('createCode')
+        }
+        else {
+            alert('Please fill in all the blanks !');
+        }
+    }
+    if (component === 'createCode') {
+        return <CreateCode />
+    }
     return (
+
         <Container>
+            <View>
+                <StatusBar barStyle="light-content" backgroundColor="#ff5a5f" />
+            </View>
+
+            <Header style={{
+                backgroundColor: '#ff5a5f'
+            }}>
+
+                <Body>
+                    <Title>Create Meet </Title>
+                </Body>
+
+            </Header>
             <Content>
                 <DateTime />
 
                 <View style={{ justifyContent: 'center' }}>
                     <Text style={styles.texts}>Title</Text>
-                    <TextInput style={[styles.inputs]} placeholderTextColor='#c1c4c9' placeholder='Beautiful meet' />
+                    <TextInput style={[styles.inputs]} onChangeText={(title) => setTitle(title)} placeholderTextColor='#c1c4c9' placeholder='Beautiful meet' />
 
                     <Text style={styles.texts}>Description</Text>
-                    <Textarea style={[styles.inputs]} rowSpan={5} bordered placeholderTextColor='#c1c4c9' placeholder='Everyone is expected.' />
+                    <Textarea style={[styles.inputs]} onChangeText={(description) => setDescription(description)} rowSpan={5} bordered placeholderTextColor='#c1c4c9' placeholder='Everyone is expected.' />
 
                     <Grid>
                         <Col>
@@ -81,7 +112,7 @@ function CreateMeet() {
                     </Grid>
                     <Grid>
                         <Row style={styles.container}>
-                            <TouchableHighlight style={styles.buttons}>
+                            <TouchableHighlight title='submit' onPress={submitMeet} style={styles.buttons}>
                                 <Text style={{ color: '#fff' }}> Create Meet </Text>
                             </TouchableHighlight>
                         </Row>
