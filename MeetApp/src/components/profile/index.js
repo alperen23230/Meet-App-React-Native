@@ -15,7 +15,7 @@ const profile = ({ navigation }) => {
         navigation.navigate('SplashScreen')
     }
     return (
-        <View>
+        <View style={{backgroundColor: 'white', flex: 1}}>
             <Button title="Sign Out" onPress={signOut} />
         </View>
     )
