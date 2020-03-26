@@ -1,8 +1,9 @@
 import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
+import { useCallback } from 'react'
 
 class FirebaseDatabase {
-    constructor(){
+    constructor() {
         this.createUniqueMeetCode = this.createUniqueMeetCode.bind(this);
         this.create_UUID = this.create_UUID.bind(this);
         this.createMeetDescriptions = this.createMeetDescriptions.bind(this);
@@ -47,13 +48,13 @@ class FirebaseDatabase {
         return uuid;
     }
 
-    async createMeetDescriptions(title, description, date, time, quota) {
+    async createMeetDescriptions(title, description, date, time, meetCode) {
 
         //Get current user id 
         const creatorUserUid = auth().currentUser.uid;
 
         //Generate random unique meet code
-        const code = this.createUniqueMeetCode(5);
+        const code = meetCode
 
         //Generate random unique meet uid 
         const uid = this.create_UUID();
@@ -67,8 +68,7 @@ class FirebaseDatabase {
             date: date,
             time: time,
             creatorUserUid: creatorUserUid,
-            code: code,
-            quota: quota
+            code: code
         }, (error) => {
             if (error) {
                 // The write failed...
@@ -79,9 +79,37 @@ class FirebaseDatabase {
             }
         });
 
+        // Create a reference for users/meets
+        const refMeets = database().ref(`/users/${creatorUserUid}/meets/${uid}`);
+
+        await refMeets.set({
+            isCreator: true,
+            isJoin: true
+        }, (error) => {
+            if (error) {
+                // The write failed...
+                alert(error)
+            } else {
+                // Data saved successfully!
+            }
+        });
 
 
+    }
+    fetchMeetDetails = async(callback) => {
 
+        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
+        const snapshot = await database().ref(`/meets/${meetUid}`).once('value');
+        
+        callback(snapshot.val())
+
+    }
+
+    fetchParticipants = async(callback) =>{
+        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
+        const snapshot = await database().ref(`/meets/${meetUid}/joiningUsers`).once('value');
+        
+        callback(snapshot.val())
     }
 }
 const firebaseDB = new FirebaseDatabase();

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title } from 'native-base';
 import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar } from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FirebaseDB from '../../networking/firebase/index';
 import CreateCode from '../../components/create-meet/create-codes';
+import MeetDetails from '../../components/meets/meet-details';
 
 function CreateMeet() {
     const [date, setDate] = useState(new Date());
@@ -15,10 +16,13 @@ function CreateMeet() {
     // Descriptions features states
     const [time, setTime] = useState('Select Time');
     const [dates, setDates] = useState('Select Date');
-    const [title, setTitle] = useState();
-    const [description, setDescription] = useState();
-    const [quota, setQuota] = useState();
+    const [title, setTitle] = useState('DENEME');
+    const [description, setDescription] = useState('DENEME');
+    const [code, setCode] = useState();
 
+    useEffect(() => {
+        createUniqueMeetCode();
+      }, []);
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -39,6 +43,15 @@ function CreateMeet() {
     const showTimepicker = () => {
         showMode('time');
     };
+    const createUniqueMeetCode = () => {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < 5; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        setCode(result);
+    }
     const DateTime = () => {
         return (
             <View>
@@ -56,18 +69,20 @@ function CreateMeet() {
             </View>
         )
     }
-    const submitMeet = async () => {
-
+    submitMeet = async () => {
         if (title && description && dates && time != null) {
-            await FirebaseDB.createMeetDescriptions(title, description, dates, time, 9999);
+
+            await FirebaseDB.createMeetDescriptions(title, description, dates, time, code);
             setComponent('createCode')
+
         }
         else {
             alert('Please fill in all the blanks !');
         }
     }
-    if (component === 'createCode') {
-        return <CreateCode />
+    if (component != 'createCode') {
+        return <MeetDetails code={code} /> /// Burası değişecek
+        
     }
     return (
 
@@ -99,7 +114,7 @@ function CreateMeet() {
                         <Col>
                             <Text style={styles.texts}>Date</Text>
                             <Item onPress={showDatepicker} rounded style={styles.items}>
-                                <Text> {dates}</Text>
+                                <Text> {dates} </Text>
 
                             </Item>
                         </Col>
