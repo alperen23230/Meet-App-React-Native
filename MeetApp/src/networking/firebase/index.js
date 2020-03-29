@@ -96,20 +96,24 @@ class FirebaseDatabase {
 
 
     }
-    fetchMeetDetails = async(callback) => {
+    fetchMeetDetails = async (callback) => {
 
         meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
         const snapshot = await database().ref(`/meets/${meetUid}`).once('value');
-        
+
         callback(snapshot.val())
 
     }
 
-    fetchParticipants = async(callback) =>{
+    fetchParticipants = async (callback) => {
+        var data = []
         meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
         const snapshot = await database().ref(`/meets/${meetUid}/joiningUsers`).once('value');
-        
-        callback(snapshot.val())
+        snapshot.forEach(function (childSnapshot) {
+            var childData = childSnapshot.val();
+            data.push(childData)
+        });
+        callback(data)
     }
 }
 const firebaseDB = new FirebaseDatabase();

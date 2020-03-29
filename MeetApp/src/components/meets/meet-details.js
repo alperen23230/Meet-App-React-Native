@@ -1,164 +1,320 @@
-import React, { useState, useEffect } from 'react';
+/**
+ * Sample React Native App
+ * https://github.com/facebook/react-native
+ *
+ * @format
+ * @flow
+ */
+
+import React, { Component } from 'react';
 import {
-    Container, Text,
-    Header, Left, Body,
-    Right, Title, Tab,
-    Tabs, TabHeading, H1, H2, H3,
-    List, ListItem, Thumbnail, Button, Icon
-} from 'native-base';
-import { StyleSheet, ActivityIndicator, View, StatusBar, SafeAreaView, ScrollView, FlatList } from 'react-native';
+    View,
+    Animated,
+    Dimensions,
+    StatusBar,
+    Platform,
+    ActivityIndicator
+} from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import FirebaseDB from '../../networking/firebase/index';
-import { useFocusEffect } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome'
+import { Container, Tabs, Tab, TabHeading, ScrollableTab, H1, H3, ListItem, Thumbnail, Button, Text, Left, Body, } from 'native-base';
 
-function meetDetails(props) {
-    const [meet, setMeet] = useState();
-    const [isLoading, setIsLoading] = useState(true);
-    const [participants, setParticipants] = useState();
+const WINDOW_HEIGHT = Dimensions.get('window').height;
+const WINDOW_WIDTH = Dimensions.get('window').width;
+const iOS = Platform.OS === 'ios';
+const STATUS_BAR_HEIGHT = StatusBar.currentHeight;
+const NAV_BAR_HEIGHT = iOS ? 60 + 20 : 60;
+const HEADER_HEIGHT = 440;
+const SCROLLABLE_TAB_HEIGHT = 40;
+const COLLAPSE_HEIGHT = HEADER_HEIGHT - NAV_BAR_HEIGHT;
 
-    useEffect(
-        () => {
-            FirebaseDB.fetchMeetDetails((result) => {
-                setMeet(result);
-                setIsLoading(false);
-            })
-            FirebaseDB.fetchParticipants((res) => {
-                var result = []
-                for (var i in res)
-                    result.push([i, res[i]]);
+export default class App extends Component {
 
-                setParticipants(result)
-                console.warn(result)
-            })
-        }, []);
-        
-    const Participants = () => {
-        return (
-            <View>
-                {
+    tabsContent = [{
+        title: 'Participants'
+    }, {
+        title: 'Not Attends'
+    }];
 
-                    console.warn(participants[0][1].username)
-               
+    listOffsetY;
+    listRefArr = [];
+    tableIndex = 0;
+    listFixedHeight = 0;
 
-                }
-            </View>
+    constructor(props) {
+        super(props);
 
-        )
+        this.listOffsetY = new Animated.Value(0);
+        this.listOffsetY.addListener((data) => {
+            if (data.value >= COLLAPSE_HEIGHT) {
+                this.listFixedHeight = COLLAPSE_HEIGHT + 1;
+            } else if (data.value < 0) {
+                this.listFixedHeight = 0;
+            } else {
+                this.listFixedHeight = data.value;
+            }
+        })
+        this.state = {
+            meet: '',
+            isLoading: true,
+            participants: [],
+            notAttends: []
+        }
     }
-    const NotAttends = () => {
-        return (
-            <View style={{ justifyContent: 'flex-start', padding: 10 }}>
-                <List>
-                    <ListItem avatar style={{ borderRadius: 20, borderColor: '#000' }}>
-                        <Left>
-                            <Thumbnail name='a' source={{ uri: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png' }} />
-                        </Left>
-                        <Body>
-                            <Text>Kumar Pratik</Text>
-                        </Body>
-                    </ListItem>
-                    <ListItem avatar style={{ borderRadius: 20, borderColor: '#000' }}>
-                        <Left>
-                            <Thumbnail name='a' source={{ uri: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png' }} />
-                        </Left>
-                        <Body>
-                            <Text>Kumar Pratik</Text>
-                        </Body>
-                    </ListItem>
-                </List>
-            </View>
-        )
+    componentDidMount() {
+        FirebaseDB.fetchMeetDetails((result) => {
+            this.setState({
+                meet: result
+            })
+        })
+        FirebaseDB.fetchParticipants((res) => {
+            console.log(res)
+
+            this.setState({
+                isLoading: false,
+                participants: res
+            })
+        })
     }
-    if (!isLoading) {
 
+    getCollapseHeightOffset() {
+        return this.listOffsetY.interpolate({
+            inputRange: [-1, 0, COLLAPSE_HEIGHT, COLLAPSE_HEIGHT + 1],
+            outputRange: [0, 0, - COLLAPSE_HEIGHT, - COLLAPSE_HEIGHT],
+        });;
+    }
+
+    renderCollapseHeader() {
         return (
-            <Container>
-                <Header hasTabs style={{ backgroundColor: '#ff5a5f' }}>
-                    <Body>
-                        <Title>{meet.title} </Title>
-                    </Body>
-                </Header>
-                <SafeAreaView style={styles.container}>
-                    <ScrollView style={styles.scrollView}>
-                        <Grid style={{ marginTop: '5%' }}>
+            <Animated.View
+                style={{
+                    transform: [{
+                        translateY: this.getCollapseHeightOffset()
+                    }],
+                    height: 'auto',
+                    width: WINDOW_WIDTH,
+                    position: 'absolute',
+                    top: 0,
+                }}
+            >
+                <Grid style={{ marginTop: '10%' }}>
 
+                    <Row>
+                        <Col size={5} style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
+                            <H1>{this.state.meet.title}</H1>
+                        </Col>
+                        <Col size={2} style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
+                            <H3 style={{ color: '#b8b0b1' }}>Code{"\n"}{this.state.meet.code}</H3>
+                        </Col>
+                    </Row>
+                    <Row style={{ marginTop: '5%' }}>
+                        <Col style={{ backgroundColor: '#fff', minHeight: 200, justifyContent: 'flex-start', padding: 10 }}>
+                            <Text>&nbsp; &nbsp;{this.state.meet.description}</Text>
+                        </Col>
+                    </Row>
+
+                    <Row style={{ marginTop: '2%' }}>
+                        <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
                             <Row>
-                                <Col size={5} style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
-                                    <H1>{meet.title}</H1>
-                                </Col>
-                                <Col size={2} style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 10 }}>
-                                    <H3 style={{ color: '#b8b0b1' }}>Code{"\n"}{meet.code}</H3>
-                                </Col>
-                            </Row>
-                            <Row style={{ marginTop: '5%' }}>
-                                <Col style={{ backgroundColor: '#fff', minHeight: 100, justifyContent: 'flex-start', padding: 10 }}>
-                                    <Text>&nbsp; &nbsp;{meet.description}</Text>
-                                </Col>
-                            </Row>
-                            <Row style={{ marginTop: '2%' }}>
-                                <Col style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text note style={{ color: '#000' }}>by Alperen Arıcı</Text>
-                                </Col>
-                                <Col style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text note style={{ color: '#000' }}>{meet.date}</Text>
-                                </Col>
-                                <Col style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center' }}>
-                                    <Text note style={{ color: '#000' }}>{meet.time}</Text>
-                                </Col>
-                            </Row>
-                            <Row style={{ marginTop: '2%' }}>
                                 <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Button rounded danger>
+                                    <Button style={{ flex: 1, backgroundColor: 'green', alignItems: 'center', justifyContent: 'center', width: 50, height: 50, borderRadius: 50 / 2 }}>
                                         {/** Buralara Icon gelecek */}
-                                        <Text>ICON</Text>
+                                        <Icon name="check" size={25} style={{ color: 'white', padding: 10 }} />
                                     </Button>
                                 </Col>
                                 <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Button rounded primary>
+                                    <Button style={{ flex: 1, backgroundColor: '#707070', alignItems: 'center', justifyContent: 'center', width: 50, height: 50, borderRadius: 50 / 2 }}>
                                         {/** Buralara Icon gelecek */}
-                                        <Text>ICON</Text>
+                                        <Icon name="share-alt" size={25} style={{ color: 'white', padding: 10 }} />
                                     </Button>
                                 </Col>
+                                <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
+                                    <Button style={{ flex: 1, backgroundColor: 'red', alignItems: 'center', justifyContent: 'center', width: 50, height: 50, borderRadius: 50 / 2 }}>
+                                        {/** Buralara Icon gelecek */}
+                                        <Icon name="times" size={25} style={{ color: 'white', padding: 10 }} />
+                                    </Button>
+                                </Col>
+
                             </Row>
-                        </Grid>
-                        <Tabs style={{ marginTop: '5%' }}>
-                            <Tab style={{ backgroundColor: '#fff', minHeight: 500 }} heading={<TabHeading style={{ backgroundColor: '#fff' }}><Text style={{ color: '#000' }}>Participants</Text></TabHeading>}>
-                                <Participants />
-                            </Tab>
-                            <Tab style={{ backgroundColor: '#fff', minHeight: 500 }} heading={<TabHeading style={{ backgroundColor: '#fff' }}><Text style={{ color: '#000' }}>Not Attends</Text></TabHeading>}>
-                                <NotAttends />
-                            </Tab>
-                        </Tabs>
-                    </ScrollView>
-                </SafeAreaView>
 
-
-
-            </Container>
-
-
+                        </Col>
+                        <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
+                            <Col style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ color: '#000' }}>{this.state.meet.date}</Text>
+                            </Col>
+                            <Col style={{ backgroundColor: '#fff', minHeight: 10, justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ color: '#000' }}>{this.state.meet.time}</Text>
+                            </Col>
+                        </Col>
+                    </Row>
+                </Grid>
+            </Animated.View>
         )
     }
-    return (
-        //Loading component
-        <View style={[styles.container, styles.horizontal]}>
-            <ActivityIndicator size="large" color="#ff5a5f" />
-        </View>
-    )
 
-}
-export default meetDetails
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        position: 'relative', flex: 1
-    },
-    horizontal: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-    },
-    scrollView: {
-        backgroundColor: '#fff',
+    renderItem({ item, index }) {
+        return (
+            <View
+                key={`${item.username}-${index}`}
+                style={{ height: 'auto', padding: 15, justifyContent: 'center', backgroundColor: 'white' }}
+            >
+                <ListItem avatar style={{ borderRadius: 20, borderColor: '#000' }}>
+                    <Left>
+                        <Thumbnail name='a' source={{ uri: 'https://cdn3.iconfinder.com/data/icons/vector-icons-6/96/256-512.png' }} />
+                    </Left>
+                    <Body>
+                        <Text>{item.username}</Text>
+                    </Body>
+                </ListItem>
+            </View>
+        )
     }
-});
+
+    getTabsOffsetY() {
+        return this.listOffsetY.interpolate({
+            inputRange: [-1, 0, COLLAPSE_HEIGHT, COLLAPSE_HEIGHT + 1],
+            outputRange: [COLLAPSE_HEIGHT, COLLAPSE_HEIGHT, 0, 0],
+        })
+    }
+
+    onScrollEnd() {
+        this.listRefArr.forEach((item) => {
+            if (item.key === this.tableIndex) return;
+            if (item.value) {
+                item.value.getNode().scrollToOffset({ offset: this.listFixedHeight, animated: false });
+            }
+        })
+    }
+
+    renderTables() {
+        return (
+            <Tabs
+                style={{
+                    marginTop: NAV_BAR_HEIGHT
+                }}
+                onChangeTab={({ i }) => {
+                    this.tableIndex = i;
+                }}
+                renderTabBar={(props) =>
+                    <Animated.View
+                        style={{
+                            zIndex: 1,
+                            transform: [{ translateY: this.getTabsOffsetY() }],
+                        }}
+                    >
+                        <ScrollableTab
+                            {...props}
+                            underlineStyle={{ backgroundColor: '#ff5a5f', height: 2 }}
+                            style={{
+                                height: SCROLLABLE_TAB_HEIGHT,
+                                backgroundColor: 'white'
+                            }}
+                        />
+                    </Animated.View>
+                }
+            >
+                {this.tabsContent.map((content, index) =>
+                    <Tab
+                        key={`${index}`}
+                        heading={
+                            <TabHeading
+                                style={{ backgroundColor: '#ffffff', width: WINDOW_WIDTH / 2 }}
+                            >
+                                <Text style={{ color: '#ff5a5f' }}>{content.title}</Text>
+                            </TabHeading>
+                        }
+                    >
+                        <Animated.FlatList
+                            ref={(comp) => {
+                                if (comp) {
+                                    this.listRefArr.push({
+                                        key: index,
+                                        value: comp,
+                                    });
+                                    setTimeout(() => {
+                                        comp.getNode().scrollToOffset({ offset: this.listFixedHeight, animated: false });
+                                    });
+                                }
+                            }}
+                            data={content.title === "Participants" ? this.state.participants : this.state.notAttends}
+                            renderItem={this.renderItem.bind(this)}
+                            scrollEventThrottle={16}
+                            onScrollEndDrag={this.onScrollEnd.bind(this)}
+                            onMomentumScrollEnd={this.onScrollEnd.bind(this)}
+                            onScroll={Animated.event(
+                                [{ nativeEvent: { contentOffset: { y: this.listOffsetY } } }],
+                                { useNativeDriver: true },
+                            )}
+                            style={{
+                                height: WINDOW_HEIGHT - HEADER_HEIGHT - SCROLLABLE_TAB_HEIGHT + COLLAPSE_HEIGHT
+                            }}
+                            contentContainerStyle={{
+                                paddingTop: COLLAPSE_HEIGHT,
+                                minHeight: WINDOW_HEIGHT - HEADER_HEIGHT - SCROLLABLE_TAB_HEIGHT + 2 * COLLAPSE_HEIGHT + 1,
+                            }}
+                        />
+                    </Tab>)}
+            </Tabs>
+        )
+    }
+
+    getNavBarColor() {
+        return this.listOffsetY.interpolate({
+            inputRange: [-1, 0, COLLAPSE_HEIGHT, COLLAPSE_HEIGHT + 1],
+            outputRange: [0, 0, 1, 1]
+        })
+    }
+
+    renderNavBar() {
+        return (
+            <View
+                style={{
+                    position: 'absolute',
+                    flexDirection: 'row',
+                    paddingTop: iOS ? 20 : 0,
+                    height: NAV_BAR_HEIGHT,
+                    width: WINDOW_WIDTH,
+                    alignItems: 'center',
+                    paddingHorizontal: 15,
+                }}
+            >
+                <Animated.View
+                    style={{
+                        position: 'absolute',
+                        width: WINDOW_WIDTH,
+                        height: NAV_BAR_HEIGHT,
+                        backgroundColor: '#ff5a5f',
+                        opacity: this.getNavBarColor()
+                    }}
+                />
+                <Text style={{ marginLeft: 15, color: 'white' }}>{this.state.meet.title}</Text>
+            </View>
+        )
+    }
+
+    render() {
+        if (!this.state.isLoading) {
+            return (
+                <Container>
+                    {this.renderTables()}
+                    {this.renderCollapseHeader()}
+                    {this.renderNavBar()}
+                </Container>
+            );
+        } else {
+            return (
+                //Loading component
+                <View style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    position: 'relative', flexDirection: 'row',
+                    justifyContent: 'space-around',
+                }}>
+                    <ActivityIndicator size="large" color="#ff5a5f" />
+                </View>
+            )
+        }
+
+    }
+};
