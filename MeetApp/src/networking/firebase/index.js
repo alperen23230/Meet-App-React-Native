@@ -2,6 +2,9 @@ import auth from '@react-native-firebase/auth'
 import database from '@react-native-firebase/database'
 import { useCallback } from 'react'
 
+var Participants = [];
+var NotAttends = [];
+
 class FirebaseDatabase {
     constructor() {
         this.createUniqueMeetCode = this.createUniqueMeetCode.bind(this);
@@ -105,15 +108,134 @@ class FirebaseDatabase {
 
     }
 
-    fetchParticipants = async (callback) => {
-        var data = []
+    fetchParticipants =  async(callback) => {
+        //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
         meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-        const snapshot = await database().ref(`/meets/${meetUid}/joiningUsers`).once('value');
+        await database().ref(`/meets/${meetUid}/joiningUsers`).on('value',function(snap) {
+            Participants = []
+            snap.forEach(function (childSnapshot) {
+                var childData = childSnapshot.val();
+                Participants.push(childData)
+            });
+            callback(Participants)
+            
+        });
+    }
+
+    fetchNotAttends = async (callback) => {
+       //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
+
+       meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
+       await database().ref(`/meets/${meetUid}/notJoiningUsers`).on('value',function(snap) {
+           NotAttends = []
+           snap.forEach(function (childSnapshot) {
+               var childData = childSnapshot.val();
+               NotAttends.push(childData)
+           });
+           callback(NotAttends)
+           
+       });
+    }
+
+    getCurrentUsername = async () => {
+        var userInfo = []
+        const uid = auth().currentUser.uid;
+        const snapshot = await database().ref(`/users/${uid}`).once('value');
         snapshot.forEach(function (childSnapshot) {
             var childData = childSnapshot.val();
-            data.push(childData)
+            userInfo.push(childData)
         });
-        callback(data)
+        return userInfo[1] // first index of array is equal to username. If database change, Change this part.
+    }
+    attendOperation = async () => {
+        const username = await this.getCurrentUsername() // // Current user Username
+        const userUid = auth().currentUser.uid //// Current user Uid
+        const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
+        var isParticipantsEmpty = true;
+
+        NotAttends.forEach(element => {
+            if (element.username === username) {
+
+                const deleteUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
+                deleteUser.remove()
+                const addUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
+                addUser.set({
+                    username: username
+                }, (error) => {
+                    // this is error
+                });
+                alert('Your not attend status has been changed to participant.')
+                return 'Your not attend status has been changed to participant.'
+            }
+        });
+        Participants.forEach(element => {
+            isParticipantsEmpty = false
+            if (element.username != username) {
+                const addUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
+                addUser.set({
+                    username: username
+                }, (error) => {
+                    // this is error
+                });
+                Participants.push({ 'username': username })
+                alert('Operation is success')
+                return 'User added in Participants'
+            }
+        });
+
+        if (isParticipantsEmpty) {
+            const addUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
+            addUser.set({
+                username: username
+            }, (error) => {
+                // this is error
+            });
+        }
+    }
+    notAttendOperation = async () => {
+        const username = await this.getCurrentUsername() // // Current user Username
+        const userUid = auth().currentUser.uid //// Current user Uid
+        const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
+        var isParticipantsEmpty = true;
+
+        Participants.forEach(element => {
+            if (element.username === username) {
+
+                const deleteUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
+                deleteUser.remove()
+                const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
+                addUser.set({
+                    username: username
+                }, (error) => {
+                    // this is error
+                });
+                alert('Your participant status has been changed to not attend.')
+                return 'Your  participant status has been changed to not attend.'
+            }
+        });
+        NotAttends.forEach(element => {
+            isParticipantsEmpty = false
+            console.warn(element.username)
+            if (element.username != username) {
+                const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
+                addUser.set({
+                    username: username
+                }, (error) => {
+                    // this is error
+                });
+                alert('Operation is success NotAttends')
+                return 'User added in NotAttends'
+            }
+        });
+
+        if (isParticipantsEmpty) {
+            const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
+            addUser.set({
+                username: username
+            }, (error) => {
+                // this is error
+            });
+        }
     }
 }
 const firebaseDB = new FirebaseDatabase();
