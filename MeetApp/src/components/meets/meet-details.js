@@ -11,7 +11,7 @@ import { Col, Row, Grid } from "react-native-easy-grid";
 import FirebaseDB from '../../networking/firebase/index';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { Container, Tabs, Tab, TabHeading, ScrollableTab, H1, ListItem, Thumbnail, Button, Text, Left, Body, } from 'native-base';
-import database from '@react-native-firebase/database'
+import Share from 'react-native-share';
 
 const WINDOW_HEIGHT = Dimensions.get('window').height;
 const WINDOW_WIDTH = Dimensions.get('window').width;
@@ -55,6 +55,7 @@ export default class App extends Component {
             notAttends: [],
         }
     }
+
     componentDidMount() {
         FirebaseDB.fetchMeetDetails((result) => {
             this.setState({
@@ -62,17 +63,11 @@ export default class App extends Component {
             })
         })
 
-        /*FirebaseDB.fetchParticipants((res) => {
-            this.setState({
-                isLoading: false,
-                participants: res
-            })
-        })*/
         FirebaseDB.fetchParticipants((res) => {
             this.setState({
                 isLoading: false,
                 participants: res,
-                
+
             })
         })
         FirebaseDB.fetchNotAttends((res) => {
@@ -90,100 +85,21 @@ export default class App extends Component {
         });;
     }
 
-    attendOperation = async () => {
+    attendOperation = async () => await FirebaseDB.attendOperation();
+    notAttendOperation = async () => await FirebaseDB.notAttendOperation();
+    openShareScreen = () => {
+        const code = this.state.meet.code;
+        const shareOptions = {
+            type: 'text',
+            title: 'MeetApp',
+            message: 'Hello from MeetApp ! \nDo you want to join our meeting ? \nYou can use the code below to join. \nCode : ' + code + ' ',
+        };
 
-        await FirebaseDB.attendOperation()
-        this.setState({
-            participants: []
-        })
-        FirebaseDB.fetchParticipants((res) => {
-            this.setState({
-                isLoading: false,
-                participants: res
-            })
-        })
+        Share.open(shareOptions)
+            .then(res => console.log(res))
+            .catch();
 
-        /*
-        
-                const currentUserName = await FirebaseDB.getCurrentUsername()
-                var checked = true;
-                var isArrayEmpty = true;
-                this.state.notAttends.forEach(element => {
-                    if (element.username === currentUserName) {
-                        this.state.notAttends.pop({ 'username': currentUserName })
-        
-                        this.setState({
-                            participants: this.state.participants.concat({ 'username': currentUserName })
-                        })
-                        checked = false
-                        isArrayEmpty = false;
-                    }
-                    else {
-                        console.warn('girmemeli')
-                    }
-                });
-                if (checked) {
-                    this.state.participants.forEach(element => {
-                        isArrayEmpty = false;
-                        if (element.username !== currentUserName) {
-                            this.setState({
-                                participants: this.state.participants.concat({ 'username': currentUserName })
-                            })
-                            checked = false;
-                        }
-                        else {
-                            console.warn('girmemeli')
-                        }
-                    });
-                }
-                if (isArrayEmpty) {
-                    this.setState({
-                        participants: this.state.participants.concat({ 'username': currentUserName })
-                    })
-                }*/
     }
-    notAttendOperation = async () => {
-
-        await FirebaseDB.notAttendOperation()
-        const currentUserName = await FirebaseDB.getCurrentUsername()
-        var checked = true;
-        var isArrayEmpty = true;
-        this.state.participants.forEach(element => {
-
-            if (element.username === currentUserName) {
-                this.state.participants.pop({ 'username': currentUserName })
-
-                this.setState({
-                    notAttends: this.state.notAttends.concat({ 'username': currentUserName })
-                })
-                checked = false
-                isArrayEmpty = false;
-            }
-            else {
-                console.warn('girmemeli')
-            }
-        });
-        if (checked) {
-            this.state.notAttends.forEach(element => {
-                isArrayEmpty = false;
-                if (element.username !== currentUserName) {
-                    this.setState({
-                        notAttends: this.state.notAttends.concat({ 'username': currentUserName })
-                    })
-                    checked = false;
-                }
-                else {
-                    console.warn('girmemeli')
-                }
-            });
-        }
-        if (isArrayEmpty) {
-            this.setState({
-                notAttends: this.state.notAttends.concat({ 'username': currentUserName })
-            })
-        }
-    }
-
     renderCollapseHeader() {
         return (
             <Animated.View
@@ -225,7 +141,7 @@ export default class App extends Component {
                                     </Button>
                                 </Col>
                                 <Col style={{ backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' }}>
-                                    <Button style={{ flex: 1, backgroundColor: '#707070', alignItems: 'center', justifyContent: 'center', width: 50, height: 50, borderRadius: 50 / 2 }}>
+                                    <Button onPress={this.openShareScreen} style={{ flex: 1, backgroundColor: '#707070', alignItems: 'center', justifyContent: 'center', width: 50, height: 50, borderRadius: 50 / 2 }}>
                                         {/** Buralara Icon gelecek */}
                                         <Icon name="share-alt" size={25} style={{ color: 'white', padding: 10 }} />
                                     </Button>

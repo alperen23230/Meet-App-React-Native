@@ -108,33 +108,33 @@ class FirebaseDatabase {
 
     }
 
-    fetchParticipants =  async(callback) => {
+    fetchParticipants = async (callback) => {
         //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
         meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-        await database().ref(`/meets/${meetUid}/joiningUsers`).on('value',function(snap) {
+        await database().ref(`/meets/${meetUid}/joiningUsers`).on('value', function (snap) {
             Participants = []
             snap.forEach(function (childSnapshot) {
                 var childData = childSnapshot.val();
                 Participants.push(childData)
             });
             callback(Participants)
-            
+
         });
     }
 
     fetchNotAttends = async (callback) => {
-       //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
+        //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
 
-       meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-       await database().ref(`/meets/${meetUid}/notJoiningUsers`).on('value',function(snap) {
-           NotAttends = []
-           snap.forEach(function (childSnapshot) {
-               var childData = childSnapshot.val();
-               NotAttends.push(childData)
-           });
-           callback(NotAttends)
-           
-       });
+        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
+        await database().ref(`/meets/${meetUid}/notJoiningUsers`).on('value', function (snap) {
+            NotAttends = []
+            snap.forEach(function (childSnapshot) {
+                var childData = childSnapshot.val();
+                NotAttends.push(childData)
+            });
+            callback(NotAttends)
+
+        });
     }
 
     getCurrentUsername = async () => {
@@ -151,35 +151,21 @@ class FirebaseDatabase {
         const username = await this.getCurrentUsername() // // Current user Username
         const userUid = auth().currentUser.uid //// Current user Uid
         const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
+
         var isParticipantsEmpty = true;
 
         NotAttends.forEach(element => {
             if (element.username === username) {
 
                 const deleteUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
-                deleteUser.remove()
-                const addUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
-                addUser.set({
-                    username: username
-                }, (error) => {
-                    // this is error
-                });
-                alert('Your not attend status has been changed to participant.')
-                return 'Your not attend status has been changed to participant.'
+                deleteUser.remove();
             }
         });
         Participants.forEach(element => {
-            isParticipantsEmpty = false
-            if (element.username != username) {
-                const addUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
-                addUser.set({
-                    username: username
-                }, (error) => {
-                    // this is error
-                });
-                Participants.push({ 'username': username })
-                alert('Operation is success')
-                return 'User added in Participants'
+            //isParticipantsEmpty = false
+            if (element.username === username) {
+                isParticipantsEmpty = false;
+                alert('User Already Defined !');
             }
         });
 
@@ -190,52 +176,78 @@ class FirebaseDatabase {
             }, (error) => {
                 // this is error
             });
+            alert('You are a participants.');
         }
+        //users table part
+
+        const userMeet = database().ref(`/users/${userUid}/meets/${meetUid}`);
+        userMeet.set({
+            isJoin: true
+        }, (error) => {
+            // this is error
+        });
+
     }
     notAttendOperation = async () => {
         const username = await this.getCurrentUsername() // // Current user Username
         const userUid = auth().currentUser.uid //// Current user Uid
         const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
-        var isParticipantsEmpty = true;
+        var isNotAttendsEmpty = true;
 
         Participants.forEach(element => {
             if (element.username === username) {
-
                 const deleteUser = database().ref(`/meets/${meetUid}/joiningUsers/${userUid}`);
-                deleteUser.remove()
-                const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
-                addUser.set({
-                    username: username
-                }, (error) => {
-                    // this is error
-                });
-                alert('Your participant status has been changed to not attend.')
-                return 'Your  participant status has been changed to not attend.'
+                deleteUser.remove();
             }
         });
         NotAttends.forEach(element => {
-            isParticipantsEmpty = false
-            console.warn(element.username)
-            if (element.username != username) {
-                const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
-                addUser.set({
-                    username: username
-                }, (error) => {
-                    // this is error
-                });
-                alert('Operation is success NotAttends')
+
+            if (element.username === username) {
+                isNotAttendsEmpty = false;
+                alert('User already not attends.');
                 return 'User added in NotAttends'
             }
         });
 
-        if (isParticipantsEmpty) {
+        if (isNotAttendsEmpty) {
             const addUser = database().ref(`/meets/${meetUid}/notJoiningUsers/${userUid}`);
             addUser.set({
                 username: username
             }, (error) => {
                 // this is error
             });
+            alert('User added on not attends.');
         }
+        
+        const userMeet = database().ref(`/users/${userUid}/meets/${meetUid}`);
+        userMeet.set({
+            isJoin: false
+        }, (error) => {
+            // this is error
+        });
+    }
+
+    fetchDashboardMeets = async() =>{
+        const currentUserUid = auth().currentUser.uid;
+        const meets = []
+        await database().ref(`/users/${currentUserUid}/meets`).on('value', function (snap) {
+            snap.forEach(function (childSnapshot) {
+                var childData = childSnapshot.key;
+                meets.push(childData);
+            });
+            meets.forEach(meetUid=>{
+                database().ref(`/meets/${meetUid}`).on('value', function (snap) {
+                    
+                    snap.forEach(function (childSnapshot) {
+                        var childData = childSnapshot.val();
+                        console.log(childData)
+                    });
+                    
+                });
+            })
+        });
+
+        
     }
 }
 const firebaseDB = new FirebaseDatabase();
