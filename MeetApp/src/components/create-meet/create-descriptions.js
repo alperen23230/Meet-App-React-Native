@@ -7,7 +7,7 @@ import FirebaseDB from '../../networking/firebase/index';
 import CreateCode from '../../components/create-meet/create-codes';
 import MeetDetails from '../../components/meets/meet-details';
 
-function CreateMeet() {
+function CreateMeet({ navigation }) {
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
@@ -73,17 +73,14 @@ function CreateMeet() {
         if (title && description && dates && time != null) {
 
             await FirebaseDB.createMeetDescriptions(title, description, dates, time, code);
-            setComponent('createCode')
+            navigation.navigate('MeetDetail', { code: code })
 
         }
         else {
             alert('Please fill in all the blanks !');
         }
     }
-    if (component != 'createCode') {
-        return <MeetDetails code={code} /> /// Burası değişecek
-        
-    }
+
     return (
 
         <Container>

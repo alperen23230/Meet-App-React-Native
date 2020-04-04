@@ -48,6 +48,7 @@ export default class App extends Component {
                 this.listFixedHeight = data.value;
             }
         })
+        //console.warn(props.route.params.code)
         this.state = {
             meet: '',
             isLoading: true,
