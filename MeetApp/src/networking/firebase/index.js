@@ -5,6 +5,7 @@ import { useCallback } from 'react'
 var Participants = [];
 var NotAttends = [];
 var codes = [];
+var isExistUsername = false;
 class FirebaseDatabase {
     constructor() {
         this.createUniqueMeetCode = this.createUniqueMeetCode.bind(this);
@@ -17,18 +18,36 @@ class FirebaseDatabase {
 
         // Create a reference
         const ref = database().ref(`/users/${uid}`);
+        let isExist = this.checkUsernameExist(username)
+        if (isExist) {
+            alert("Username is Exist")
+        } else {
+            await ref.set({
+                username: username
+            }, (error) => {
+                if (error) {
+                    // The write failed...
+                    console.log(error)
+                    alert("Error")
+                } else {
+                    // Data saved successfully!
+                    navigation.navigate('InitialApp')
+                }
+            });
+        }
+    }
 
-        await ref.set({
-            username: username
-        }, (error) => {
-            if (error) {
-                // The write failed...
-                console.log(error)
+    checkUsernameExist = async(username) => {
+        isExistUsername = false;
+        await database().ref().child("users").orderByChild("username").equalTo(username).on("value", function (snapshot) {
+            if (snapshot.exists()) {
+                console.log("exist")
+                isExistUsername = true
             } else {
-                // Data saved successfully!
-                navigation.navigate('InitialApp')
+                console.log("not exist")
             }
         });
+        return isExistUsername;
     }
 
     createUniqueMeetCode(length) {
@@ -253,7 +272,7 @@ class FirebaseDatabase {
     }
     fetchAllMeets = async () => {
         await database().ref(`/meets`).on('value', function (snap) {
-            
+
             snap.forEach(function (childSnapshot) {
                 var childData = { 'code': childSnapshot.val().code, 'key': childSnapshot.key };
                 codes.push(childData);
