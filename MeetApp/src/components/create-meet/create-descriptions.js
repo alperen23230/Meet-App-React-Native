@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title } from 'native-base';
-import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar } from 'react-native';
+import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title ,H1 } from 'native-base';
+import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar} from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FirebaseDB from '../../networking/firebase/index';
@@ -72,8 +72,8 @@ function CreateMeet({ navigation }) {
     submitMeet = async () => {
         if (title && description && dates && time != null) {
 
-            await FirebaseDB.createMeetDescriptions(title, description, dates, time, code);
-            navigation.navigate('MeetDetail', { code: code })
+            const uid = await FirebaseDB.createMeetDescriptions(title, description, dates, time, code);
+            navigation.navigate('MeetDetail', { code: uid })
 
         }
         else {
@@ -83,21 +83,13 @@ function CreateMeet({ navigation }) {
 
     return (
 
-        <Container>
+        <Container >
             <View>
                 <StatusBar barStyle="light-content" backgroundColor="#ff5a5f" />
             </View>
 
-            <Header style={{
-                backgroundColor: '#ff5a5f'
-            }}>
-
-                <Body>
-                    <Title>Create Meet </Title>
-                </Body>
-
-            </Header>
-            <Content>
+            <H1 style={{ padding: 20, color: '#ff5a5f' }}>CREATE MEET</H1>
+            <Content style={{paddingHorizontal:10}}>
                 <DateTime />
 
                 <View style={{ justifyContent: 'center' }}>

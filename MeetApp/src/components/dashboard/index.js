@@ -1,56 +1,68 @@
-import React, { useEffect } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, FlatList, TouchableWithoutFeedback, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, TextInput, StyleSheet, ScrollView, FlatList, TouchableWithoutFeedback, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Container, Tabs, Tab, TabHeading, ScrollableTab, H1, ListItem, Thumbnail, Button, Text, Left, Body, } from 'native-base';
 import FirebaseDB from '../../networking/firebase/index';
+import { useFocusEffect } from '@react-navigation/native'
 
-var images = [
-    { id: 3, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 5, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 35, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 523, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 23, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-    { id: 352, titles: 'React hackathon', description: '../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg ../assets/foto.jpg../assets/foto.jpg' },
-
-]
-
-function Item({ title }) {
+function Item({ title, navigation }) {
+    const nav = () => {
+        navigation.navigate('MeetDetail', { code: title.key })
+    }
     return (
         <View style={styles.item}>
             <TouchableWithoutFeedback
-                onPress={() => this.openImage(index)}
-                key={title.id}>
+                onPress={nav}
+                key={title.key}>
                 <View>
-                    <Text uppercase>{title.titles}</Text>
-                    <Text note>{title.description.substr(1, 50)}...</Text>
+                    <Text uppercase>{title.title}</Text>
+                    <Text note>{title.description.substr(0, 50)}...</Text>
                 </View>
-
-
             </TouchableWithoutFeedback>
         </View>
     );
 }
 
-function Dashboard() {
-    useEffect(() => {
-        FirebaseDB.fetchDashboardMeets();
+function Dashboard({ navigation }) {
+    const [meets, SetMeets] = useState();
+    const [isLoading, SetIsLoading] = useState(true);
 
-    })
+    useFocusEffect(
+        React.useCallback(() => {
+            SetMeets();
+            FirebaseDB.fetchDashboardMeets((res) => {
+                SetMeets(res);
+                SetIsLoading(false);
+            })
+
+        }, [])
+    );
+    const Search = async (text) => {
+        await FirebaseDB.search((res) => {
+            navigation.navigate('MeetDetail', { code: res })
+        }, text);
+    }
+    if (isLoading) {
+        return (
+            //Loading component
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                position: 'relative', flexDirection: 'row',
+                justifyContent: 'space-around',
+            }}>
+                <ActivityIndicator size="large" color="#ff5a5f" />
+            </View>
+        )
+    }
     return (
         <View style={{ backgroundColor: '#fff', flex: 1 }}>
             <H1 style={{ padding: 20, color: '#ff5a5f' }}>SEARCH</H1>
-            <TextInput style={styles.inputs} onChangeText={(title) => setTitle(title)} placeholderTextColor='#c1c4c9' placeholder='Enter Code' />
+            <TextInput style={styles.inputs} onChangeText={(text) => Search(text)} placeholderTextColor='#c1c4c9' placeholder='Enter Code' />
             <ScrollView style={{ flex: 1 }}>
                 <SafeAreaView style={styles.container}>
                     <FlatList
-                        data={images}
-                        renderItem={({ item }) => <Item title={item} />}
+                        data={meets}
+                        renderItem={({ item }) => <Item navigation={navigation} title={item} />}
                         keyExtractor={item => item.id}
                     />
                 </SafeAreaView>
@@ -73,9 +85,14 @@ const styles = StyleSheet.create({
         padding: 20
     },
     item: {
+        marginVertical:5,
         paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderColor: '#ff5a5f'
+        paddingHorizontal:5,
+        borderWidth:1,
+        borderColor: '#ff5a5f',
+        borderRadius:15,
+
+        
 
     }
 });

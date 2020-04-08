@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 
 var Participants = [];
 var NotAttends = [];
-
+var codes = [];
 class FirebaseDatabase {
     constructor() {
         this.createUniqueMeetCode = this.createUniqueMeetCode.bind(this);
@@ -96,22 +96,21 @@ class FirebaseDatabase {
                 // Data saved successfully!
             }
         });
-
+        return uid
 
     }
-    fetchMeetDetails = async (callback) => {
 
-        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-        const snapshot = await database().ref(`/meets/${meetUid}`).once('value');
+    fetchMeetDetails = async (callback = f => f, meetUids) => {
 
+        const snapshot = await database().ref(`/meets/${meetUids}`).once('value');
+        console.warn(snapshot.val())
         callback(snapshot.val())
 
     }
 
-    fetchParticipants = async (callback) => {
-        //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
-        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-        await database().ref(`/meets/${meetUid}/joiningUsers`).on('value', function (snap) {
+    fetchParticipants = async (callback = f => f, meetUids) => {
+
+        await database().ref(`/meets/${meetUids}/joiningUsers`).on('value', function (snap) {
             Participants = []
             snap.forEach(function (childSnapshot) {
                 var childData = childSnapshot.val();
@@ -122,11 +121,9 @@ class FirebaseDatabase {
         });
     }
 
-    fetchNotAttends = async (callback) => {
-        //var data = [] class ın üstünde tanımlanan Participants kullanıldı.
+    fetchNotAttends = async (callback = f => f, meetUids) => {
 
-        meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2';
-        await database().ref(`/meets/${meetUid}/notJoiningUsers`).on('value', function (snap) {
+        await database().ref(`/meets/${meetUids}/notJoiningUsers`).on('value', function (snap) {
             NotAttends = []
             snap.forEach(function (childSnapshot) {
                 var childData = childSnapshot.val();
@@ -147,10 +144,10 @@ class FirebaseDatabase {
         });
         return userInfo[1] // first index of array is equal to username. If database change, Change this part.
     }
-    attendOperation = async () => {
+    attendOperation = async (meetUid) => {
         const username = await this.getCurrentUsername() // // Current user Username
         const userUid = auth().currentUser.uid //// Current user Uid
-        const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
+        //const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
 
         var isParticipantsEmpty = true;
 
@@ -188,10 +185,10 @@ class FirebaseDatabase {
         });
 
     }
-    notAttendOperation = async () => {
+    notAttendOperation = async (meetUid) => {
         const username = await this.getCurrentUsername() // // Current user Username
         const userUid = auth().currentUser.uid //// Current user Uid
-        const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
+        //const meetUid = '1a712f91-974d-4185-9389-f7b1b4edede2'; //this is from parameter
         var isNotAttendsEmpty = true;
 
         Participants.forEach(element => {
@@ -218,7 +215,7 @@ class FirebaseDatabase {
             });
             alert('User added on not attends.');
         }
-        
+
         const userMeet = database().ref(`/users/${userUid}/meets/${meetUid}`);
         userMeet.set({
             isJoin: false
@@ -227,27 +224,51 @@ class FirebaseDatabase {
         });
     }
 
-    fetchDashboardMeets = async() =>{
+    fetchDashboardMeets = async (callback) => {
         const currentUserUid = auth().currentUser.uid;
-        const meets = []
+        const meets = [];
+        const eachMeet = [];
         await database().ref(`/users/${currentUserUid}/meets`).on('value', function (snap) {
             snap.forEach(function (childSnapshot) {
                 var childData = childSnapshot.key;
                 meets.push(childData);
             });
-            meets.forEach(meetUid=>{
+            meets.forEach(meetUid => {
                 database().ref(`/meets/${meetUid}`).on('value', function (snap) {
-                    
-                    snap.forEach(function (childSnapshot) {
-                        var childData = childSnapshot.val();
-                        console.log(childData)
-                    });
-                    
+
+                    var part = { 'title': snap.val().title, 'description': snap.val().description, 'key': snap.key, 'code': snap.val().code };
+                    eachMeet.push(part);
+                    callback(eachMeet);
                 });
             })
         });
+    }
 
-        
+    getMeetUid = async (callback = f => f, meetUids) => {
+
+        const snapshot = await database().ref(`/meets/${meetUids}`).once('value');
+
+        callback(snapshot.key)
+
+    }
+    fetchAllMeets = async () => {
+        await database().ref(`/meets`).on('value', function (snap) {
+            
+            snap.forEach(function (childSnapshot) {
+                var childData = { 'code': childSnapshot.val().code, 'key': childSnapshot.key };
+                codes.push(childData);
+            });
+        });
+    }
+    search = async (callback = f => f, code) => {
+        await this.fetchAllMeets()
+        codes.forEach(element => {
+            if (element.code === code) {
+                this.getMeetUid((result) => {
+                    callback(result)
+                }, element.key)
+            }
+        })
     }
 }
 const firebaseDB = new FirebaseDatabase();

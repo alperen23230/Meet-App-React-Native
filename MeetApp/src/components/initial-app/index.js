@@ -24,7 +24,10 @@ const initialApp = () => {
                         headerShown: false
                     }}
                 />
-                <Stack.Screen name="MeetDetail" component={MeetDetail} />
+                <Stack.Screen name="MeetDetail" component={MeetDetail}
+                options={{
+                    headerShown: false
+                }} />
             </Stack.Navigator>
         )
     }

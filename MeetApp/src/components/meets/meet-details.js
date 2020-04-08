@@ -62,7 +62,7 @@ export default class App extends Component {
             this.setState({
                 meet: result
             })
-        })
+        },this.props.route.params.code)
 
         FirebaseDB.fetchParticipants((res) => {
             this.setState({
@@ -70,13 +70,13 @@ export default class App extends Component {
                 participants: res,
 
             })
-        })
+        },this.props.route.params.code)
         FirebaseDB.fetchNotAttends((res) => {
             this.setState({
                 isLoading: false,
                 notAttends: res
             })
-        })
+        },this.props.route.params.code)
     }
 
     getCollapseHeightOffset() {
@@ -86,8 +86,8 @@ export default class App extends Component {
         });;
     }
 
-    attendOperation = async () => await FirebaseDB.attendOperation();
-    notAttendOperation = async () => await FirebaseDB.notAttendOperation();
+    attendOperation = async () => await FirebaseDB.attendOperation(this.props.route.params.code);
+    notAttendOperation = async () => await FirebaseDB.notAttendOperation(this.props.route.params.code);
     openShareScreen = () => {
         const code = this.state.meet.code;
         const shareOptions = {
