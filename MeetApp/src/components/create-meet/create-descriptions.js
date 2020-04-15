@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title } from 'native-base';
-import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title ,H1 } from 'native-base';
+import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar, SafeAreaView} from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FirebaseDB from '../../networking/firebase/index';
 import CreateCode from '../../components/create-meet/create-codes';
+import MeetDetails from '../../components/meets/meet-details';
 
-function CreateMeet() {
+function CreateMeet({ navigation }) {
     const [date, setDate] = useState(new Date());
     const [mode, setMode] = useState('date');
     const [show, setShow] = useState(false);
@@ -15,10 +16,13 @@ function CreateMeet() {
     // Descriptions features states
     const [time, setTime] = useState('Select Time');
     const [dates, setDates] = useState('Select Date');
-    const [title, setTitle] = useState();
-    const [description, setDescription] = useState();
-    const [quota, setQuota] = useState();
+    const [title, setTitle] = useState('DENEME');
+    const [description, setDescription] = useState('DENEME');
+    const [code, setCode] = useState();
 
+    useEffect(() => {
+        createUniqueMeetCode();
+      }, []);
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -39,6 +43,15 @@ function CreateMeet() {
     const showTimepicker = () => {
         showMode('time');
     };
+    const createUniqueMeetCode = () => {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < 5; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        setCode(result);
+    }
     const DateTime = () => {
         return (
             <View>
@@ -56,36 +69,27 @@ function CreateMeet() {
             </View>
         )
     }
-    const submitMeet = async () => {
-
+    submitMeet = async () => {
         if (title && description && dates && time != null) {
-            await FirebaseDB.createMeetDescriptions(title, description, dates, time, 9999);
-            setComponent('createCode')
+
+            const uid = await FirebaseDB.createMeetDescriptions(title, description, dates, time, code);
+            navigation.navigate('MeetDetail', { code: uid })
+
         }
         else {
             alert('Please fill in all the blanks !');
         }
     }
-    if (component === 'createCode') {
-        return <CreateCode />
-    }
+
     return (
 
-        <Container>
-            <View>
-                <StatusBar barStyle="light-content" backgroundColor="#ff5a5f" />
-            </View>
+        <Container >
+            <SafeAreaView>
+                <StatusBar barStyle="dark-content" backgroundColor="#ff5a5f" />
+            </SafeAreaView>
 
-            <Header style={{
-                backgroundColor: '#ff5a5f'
-            }}>
-
-                <Body>
-                    <Title>Create Meet </Title>
-                </Body>
-
-            </Header>
-            <Content>
+            <H1 style={{ padding: 20, color: '#ff5a5f' }}>CREATE MEET</H1>
+            <Content style={{paddingHorizontal:10}}>
                 <DateTime />
 
                 <View style={{ justifyContent: 'center' }}>
@@ -99,7 +103,7 @@ function CreateMeet() {
                         <Col>
                             <Text style={styles.texts}>Date</Text>
                             <Item onPress={showDatepicker} rounded style={styles.items}>
-                                <Text> {dates}</Text>
+                                <Text> {dates} </Text>
 
                             </Item>
                         </Col>

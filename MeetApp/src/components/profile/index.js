@@ -1,5 +1,6 @@
 import React from 'react'
-import { View, Button, StyleSheet } from 'react-native'
+import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native'
+import { Button, Text } from 'native-base'
 import { firebase } from '@react-native-firebase/auth'
 import { GoogleSignin } from '@react-native-community/google-signin';
 
@@ -15,9 +16,12 @@ const profile = ({ navigation }) => {
         navigation.navigate('SplashScreen')
     }
     return (
-        <View>
-            <Button title="Sign Out" onPress={signOut} />
-        </View>
+        <SafeAreaView style={{ backgroundColor: 'white', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <StatusBar barStyle="dark-content" />
+            <Button block onPress={signOut} style={{ backgroundColor: "#ff5a5f", marginHorizontal: 20 }}>
+                <Text color="white">Sign Out</Text>
+            </Button>
+        </SafeAreaView>
     )
 }
 

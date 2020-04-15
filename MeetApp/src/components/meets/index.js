@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native'
 
 const meets = () => {
     return(
-        <View>
+        <View style={{backgroundColor: 'white', flex: 1}}> 
             <Text>Meets</Text>
         </View>
     )
