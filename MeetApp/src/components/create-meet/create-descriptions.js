@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Text, Item, Content, Textarea, DatePicker, Header, Left, Body, Right, Title ,H1 } from 'native-base';
-import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar} from 'react-native';
+import { StyleSheet, TextInput, TouchableHighlight, View, Button, StatusBar, SafeAreaView} from 'react-native';
 import { Col, Row, Grid } from "react-native-easy-grid";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FirebaseDB from '../../networking/firebase/index';
@@ -84,9 +84,9 @@ function CreateMeet({ navigation }) {
     return (
 
         <Container >
-            <View>
-                <StatusBar barStyle="light-content" backgroundColor="#ff5a5f" />
-            </View>
+            <SafeAreaView>
+                <StatusBar barStyle="dark-content" backgroundColor="#ff5a5f" />
+            </SafeAreaView>
 
             <H1 style={{ padding: 20, color: '#ff5a5f' }}>CREATE MEET</H1>
             <Content style={{paddingHorizontal:10}}>

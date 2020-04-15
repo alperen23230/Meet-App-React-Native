@@ -1,12 +1,12 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome'
 
 import Box from '../custom-tabbar/box'
 
 function CustomTabBar({ state, descriptors, navigation }) {
     return (
-        <View style={{ flexDirection: 'row' }}>
+        <SafeAreaView style={{ flexDirection: 'row' }}>
             {state.routes.map((route, index) => {
                 const { options } = descriptors[route.key];
                 const label =
@@ -45,7 +45,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
                         </TouchableOpacity>
                     )
             })}
-        </View>
+        </SafeAreaView>
     );
 }
 

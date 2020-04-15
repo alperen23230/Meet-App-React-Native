@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, StatusBar } from 'react-native';
 import { GoogleSigninButton } from '@react-native-community/google-signin';
 import Authentication from '../../networking/authentication/index';
 import { GoogleSignin } from '@react-native-community/google-signin';
@@ -17,6 +17,7 @@ const auth = ({ navigation }) => {
     });
     return (
         <View style={styles.containerView}>
+            <StatusBar barStyle="light-content" />
             <Image style={{ width: 135, height: 145, marginTop: 175 }}
                 source={require('../../images/meet-logo.png')} />
             <GoogleSigninButton style={{ width: '50%', height: 50, marginTop: 25 }} onPress={() => this.signIn(navigation)} />

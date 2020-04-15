@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, ScrollView, FlatList, TouchableWithoutFeedback, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, TextInput, StyleSheet, ScrollView, FlatList, TouchableWithoutFeedback, SafeAreaView, ActivityIndicator, StatusBar } from 'react-native';
 import { Container, Tabs, Tab, TabHeading, ScrollableTab, H1, ListItem, Thumbnail, Button, Text, Left, Body, } from 'native-base';
 import FirebaseDB from '../../networking/firebase/index';
 import { useFocusEffect } from '@react-navigation/native'
@@ -9,7 +9,8 @@ function Item({ title, navigation }) {
         navigation.navigate('MeetDetail', { code: title.key })
     }
     return (
-        <View style={styles.item}>
+        <SafeAreaView style={styles.item}>
+            <StatusBar barStyle="dark-content" />
             <TouchableWithoutFeedback
                 onPress={nav}
                 key={title.key}>
@@ -18,7 +19,7 @@ function Item({ title, navigation }) {
                     <Text note>{title.description.substr(0, 50)}...</Text>
                 </View>
             </TouchableWithoutFeedback>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -44,18 +45,20 @@ function Dashboard({ navigation }) {
     if (isLoading) {
         return (
             //Loading component
-            <View style={{
+            <SafeAreaView style={{
                 flex: 1,
                 justifyContent: 'center',
                 position: 'relative', flexDirection: 'row',
                 justifyContent: 'space-around',
             }}>
+                <StatusBar barStyle="dark-content" />
                 <ActivityIndicator size="large" color="#ff5a5f" />
-            </View>
+            </SafeAreaView>
         )
     }
     return (
-        <View style={{ backgroundColor: '#fff', flex: 1 }}>
+        <SafeAreaView style={{ backgroundColor: '#fff', flex: 1 }}>
+            <StatusBar barStyle="dark-content" />
             <H1 style={{ padding: 20, color: '#ff5a5f' }}>SEARCH</H1>
             <TextInput style={styles.inputs} onChangeText={(text) => Search(text)} placeholderTextColor='#c1c4c9' placeholder='Enter Code' />
             <ScrollView style={{ flex: 1 }}>
@@ -67,7 +70,7 @@ function Dashboard({ navigation }) {
                     />
                 </SafeAreaView>
             </ScrollView>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -91,8 +94,6 @@ const styles = StyleSheet.create({
         borderWidth:1,
         borderColor: '#ff5a5f',
         borderRadius:15,
-
-        
-
+        marginHorizontal: 20
     }
 });
